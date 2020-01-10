@@ -13,6 +13,7 @@ function App(props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [id, setId] = useState("");
+  const [order, setOrder] = useState("");
 
   const [queryName, setQueryName] = useQueryString("nome");
   const [queryEmail, setQueryEmail] = useQueryString("email");
@@ -46,7 +47,13 @@ function App(props) {
     if (queryName) setName(queryName);
     if (queryEmail) setEmail(queryEmail);
     if (queryId) setId(queryId);
+    if (queryOrder) setOrder(queryOrder);
   }, []);
+
+  function verifyPercentage(string) {
+    if (string.includes("%")) return string.replace(new RegExp("%", "g"), "");
+    else return string;
+  }
 
   function handleSearch(func) {
     return e => {
@@ -54,34 +61,8 @@ function App(props) {
     };
   }
 
-  function handleOrder(ev) {
-    return setQueryOrder(ev.target.value);
-  }
-  // function orderByNameDesc() {
-  //   // console.log(userInfo.sort((a, b) => b.id - a.id)) id
-  //   const filterNames = userInfo
-  //     .map(user => lower(user.name.split(" ")[0]))
-  //     .sort()
-  //     .reverse()
-  //   console.log(filterNames)
-  // }
-
-  // function orderByIdDesc() {
-  //   return (
-  //     <>
-  //       {userInfo
-  //         .sort((a, b) => b.id - a.id)
-  //         .map(info => (
-  //           <div key={info.id}>
-  //             <User {...info} />
-  //           </div>
-  //         ))}
-  //     </>
-  //   );
-  // }
-
   function showUsers() {
-    const filterUsers = userInfo
+    const filteredUsers = userInfo
       .filter(
         user =>
           lower(user.name).includes(lower(name)) &&
@@ -89,7 +70,8 @@ function App(props) {
       )
       .sort()
       .filter(user => {
-        if (id.length !== 0) return user.id.includes(id);
+        if (id.includes("%")) return user.id.includes(verifyPercentage(id));
+        if (id.length !== 0) return user.id === id;
         else return user.id !== id;
       })
       .map(user => (
@@ -97,7 +79,12 @@ function App(props) {
           <User {...user} />
         </div>
       ));
-    return <div>{filterUsers}</div>;
+
+    if (Object.keys(filteredUsers).length !== 0) {
+      return <div>{filteredUsers}</div>;
+    } else {
+      return <div>Usuário nao encontrado</div>;
+    }
   }
 
   return (
@@ -106,14 +93,15 @@ function App(props) {
       <input type="text" value={name} onChange={handleSearch(setName)} />
       <input type="text" value={email} onChange={handleSearch(setEmail)} />
       <input type="text" value={id} onChange={handleSearch(setId)} />
+
       <br />
       <br />
       <label>
         <input
           type="radio"
           value="crescente"
-          checked={queryOrder === "crescente"}
-          onChange={handleOrder}
+          checked={order === "crescente"}
+          onChange={handleSearch(setOrder)}
         />
         Crescente
       </label>
@@ -121,8 +109,8 @@ function App(props) {
         <input
           type="radio"
           value="decrescente"
-          checked={queryOrder === "decrescente"}
-          onChange={handleOrder}
+          checked={order === "decrescente"}
+          onChange={handleSearch(setOrder)}
         />
         Decrescente
       </label>

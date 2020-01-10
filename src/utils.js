@@ -8,3 +8,26 @@ export function lower(string) {
   string = string.replace(new RegExp("[Ç]", "gi"), "c");
   return string;
 }
+
+// function orderByNameDesc() {
+//   // console.log(userInfo.sort((a, b) => b.id - a.id)) id
+//   const filterNames = userInfo
+//     .map(user => lower(user.name.split(" ")[0]))
+//     .sort()
+//     .reverse()
+//   console.log(filterNames)
+// }
+
+// function orderByIdDesc() {
+//   return (
+//     <>
+//       {userInfo
+//         .sort((a, b) => b.id - a.id)
+//         .map(info => (
+//           <div key={info.id}>
+//             <User {...info} />
+//           </div>
+//         ))}
+//     </>
+//   );
+// }
