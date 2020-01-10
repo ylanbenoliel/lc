@@ -2,15 +2,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ClientContext } from "../stores/client";
 import api from "../services/axios";
+import { lower } from "../utils";
+import User from "../components/User";
+// import Highlight from "../components/Highlight";
 
 function App(props) {
   const { userInfo, setUserInfo } = useContext(ClientContext);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [id, setId] = useState("");
 
   async function fetchUsers() {
     await api
       .get(
-        "?results=50&nat=br&inc=name,email,location,cell,picture&seed=988ce3b1e38ebe0d&noinfo"
+        "?results=50&nat=br&inc=name,email,cell,picture&seed=988ce3b1e38ebe0d&noinfo"
       )
       .then(response =>
         response.data.results.map((user, index) => ({
@@ -22,40 +28,61 @@ function App(props) {
       )
       .then(users => {
         setUserInfo(users);
-        setIsLoading(true);
+        setIsLoading(false);
       })
       .catch(error => console.log(error));
   }
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  function showUsers() {
+  useEffect(() => {
+    if (name.length !== 0) {
+      setEmail("");
+      setId("");
+    }
+    if (email.length !== 0) {
+      setName("");
+      setId("");
+    }
+    if (id.length !== 0) {
+      setName("");
+      setEmail("");
+    }
+  }, [name, email, id]);
+
+  function handleSearch(func) {
+    return e => {
+      func(e.target.value);
+    };
+  }
+
+  const showUsers = () => {
     return (
       <div>
-        {userInfo.map(user => {
-          const { name, email, image, id } = user;
-          return (
-            <div key={id}>
-              <p>
-                {name} {id}
-              </p>
-              <div>
-                <img src={image} alt={name} />
-              </div>
-              <p>{email}</p>
-              <hr />
+        {userInfo
+          .filter(
+            user =>
+              lower(user.name).includes(lower(name)) &&
+              lower(user.email).includes(lower(email))
+          )
+          .map(user => (
+            <div key={user.id}>
+              <User {...user} />
             </div>
-          );
-        })}
+          ))}
       </div>
     );
-  }
+  };
 
   return (
     <React.Fragment>
-      <h2>Random User</h2>
-      <div>{isLoading && showUsers()}</div>
+      <h2>LC Sistemas</h2>
+      <input type="text" value={name} onChange={handleSearch(setName)} />
+      <input type="text" value={email} onChange={handleSearch(setEmail)} />
+      <input type="number" value={id} onChange={handleSearch(setId)} />
+      <div>{!isLoading && showUsers()}</div>
     </React.Fragment>
   );
 }
