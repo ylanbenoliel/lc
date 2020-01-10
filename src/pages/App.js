@@ -9,14 +9,15 @@ import useQueryString from "../hooks/useQueryString";
 function App(props) {
   const { userInfo, setUserInfo } = useContext(ClientContext);
   const [isLoading, setIsLoading] = useState(true);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [id, setId] = useState("");
-  // const [name, setName] = useQueryString("nome");
-  // const [email, setEmail] = useQueryString("email");
-  // const [id, setId] = useQueryString("id");
 
-  const [order, setOrder] = useQueryString("ordem");
+  const [queryName, setQueryName] = useQueryString("nome");
+  const [queryEmail, setQueryEmail] = useQueryString("email");
+  const [queryId, setQueryId] = useQueryString("id");
+  const [queryOrder, setQueryOrder] = useQueryString("ordem");
 
   async function fetchUsers() {
     await api
@@ -38,24 +39,14 @@ function App(props) {
       .catch(error => console.log(error));
   }
 
+  //init effect
   useEffect(() => {
     fetchUsers();
-  }, []);
 
-  // useEffect(() => {
-  //   if (name.length !== 0) {
-  //     setEmail("");
-  //     setId("");
-  //   }
-  //   if (email.length !== 0) {
-  //     setName("");
-  //     setId("");
-  //   }
-  //   if (id.length !== 0) {
-  //     setName("");
-  //     setEmail("");
-  //   }
-  // }, [name, email, id]);
+    if (queryName) setName(queryName);
+    if (queryEmail) setEmail(queryEmail);
+    if (queryId) setId(queryId);
+  }, []);
 
   function handleSearch(func) {
     return e => {
@@ -64,52 +55,49 @@ function App(props) {
   }
 
   function handleOrder(ev) {
-    return setOrder(ev.target.value);
+    return setQueryOrder(ev.target.value);
   }
   // function orderByNameDesc() {
-  //   // console.log(userInfo.sort((a, b) => b.id - a.id)); id
+  //   // console.log(userInfo.sort((a, b) => b.id - a.id)) id
   //   const filterNames = userInfo
   //     .map(user => lower(user.name.split(" ")[0]))
   //     .sort()
-  //     .reverse();
-  //   console.log(filterNames);
+  //     .reverse()
+  //   console.log(filterNames)
   // }
 
-  function orderByIdDesc() {
-    return (
-      <>
-        {userInfo
-          .sort((a, b) => b.id - a.id)
-          .map(info => (
-            <div key={info.id}>
-              <User {...info} />
-            </div>
-          ))}
-      </>
-    );
-  }
+  // function orderByIdDesc() {
+  //   return (
+  //     <>
+  //       {userInfo
+  //         .sort((a, b) => b.id - a.id)
+  //         .map(info => (
+  //           <div key={info.id}>
+  //             <User {...info} />
+  //           </div>
+  //         ))}
+  //     </>
+  //   );
+  // }
 
   function showUsers() {
-    return (
-      <div>
-        {userInfo
-          .filter(
-            user =>
-              lower(user.name).includes(lower(name)) &&
-              lower(user.email).includes(lower(email))
-            // user.name.includes(name) && user.email.includes(email);
-          )
-          .filter(user => {
-            if (id.length !== 0) return user.id === id;
-            else return user.id !== id;
-          })
-          .map(user => (
-            <div key={user.id}>
-              <User {...user} />
-            </div>
-          ))}
-      </div>
-    );
+    const filterUsers = userInfo
+      .filter(
+        user =>
+          lower(user.name).includes(lower(name)) &&
+          lower(user.email).includes(lower(email))
+      )
+      .sort()
+      .filter(user => {
+        if (id.length !== 0) return user.id.includes(id);
+        else return user.id !== id;
+      })
+      .map(user => (
+        <div key={user.id}>
+          <User {...user} />
+        </div>
+      ));
+    return <div>{filterUsers}</div>;
   }
 
   return (
@@ -117,14 +105,14 @@ function App(props) {
       <h2>LC Sistemas</h2>
       <input type="text" value={name} onChange={handleSearch(setName)} />
       <input type="text" value={email} onChange={handleSearch(setEmail)} />
-      <input type="number" value={id} onChange={handleSearch(setId)} />
+      <input type="text" value={id} onChange={handleSearch(setId)} />
       <br />
       <br />
       <label>
         <input
           type="radio"
           value="crescente"
-          checked={order === "crescente"}
+          checked={queryOrder === "crescente"}
           onChange={handleOrder}
         />
         Crescente
@@ -133,12 +121,15 @@ function App(props) {
         <input
           type="radio"
           value="decrescente"
-          checked={order === "decrescente"}
+          checked={queryOrder === "decrescente"}
           onChange={handleOrder}
         />
         Decrescente
       </label>
-      <button onClick={orderByIdDesc}>Ordenar</button>
+      <br />
+      <button>Ordenar</button>
+      <br />
+      <button>Buscar</button>
       <div>{!isLoading && showUsers()}</div>
     </React.Fragment>
   );

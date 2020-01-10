@@ -1,5 +1,5 @@
-import React from "react";
-// import Highlight from "./Highlight";
+import React from "react"
+// import Highlight from "./Highlight"
 
 export default function User(props) {
   return (
@@ -11,5 +11,5 @@ export default function User(props) {
       <p>{`${props.email}`}</p>
       <hr />
     </>
-  );
+  )
 }

@@ -7,7 +7,7 @@ function Root() {
   return (
     <ClientProvider>
       <Router>
-        <App />;
+        <App />
       </Router>
     </ClientProvider>
   );
