@@ -67,6 +67,10 @@ function App(props) {
               lower(user.name).includes(lower(name)) &&
               lower(user.email).includes(lower(email))
           )
+          .filter(user => {
+            if (id.length !== 0) return user.id === id;
+            else return user.id !== id;
+          })
           .map(user => (
             <div key={user.id}>
               <User {...user} />
