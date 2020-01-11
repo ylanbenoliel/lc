@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect, useState } from "react";
 import { ClientContext } from "../stores/client";
@@ -50,7 +51,7 @@ function App(props) {
     if (queryOrder) setOrder(queryOrder);
   }, []);
 
-  function verifyPercentage(string) {
+  function removePercentage(string) {
     if (string.includes("%")) return string.replace(new RegExp("%", "g"), "");
     else return string;
   }
@@ -62,26 +63,41 @@ function App(props) {
   }
 
   function showUsers() {
-    const filteredUsers = userInfo
-      .filter(
-        user =>
-          lower(user.name).includes(lower(name)) &&
-          lower(user.email).includes(lower(email))
-      )
-      .sort()
+    let filteredUsers = userInfo
       .filter(user => {
-        if (id.includes("%")) return user.id.includes(verifyPercentage(id));
-        if (id.length !== 0) return user.id === id;
-        else return user.id !== id;
+        if (name.includes("%"))
+          return lower(user.name).includes(lower(removePercentage(name)));
+
+        if (name.length !== 0)
+          return lower(user.name.slice(0, name.length)) === lower(name);
+
+        return user.name !== name;
       })
-      .map(user => (
-        <div key={user.id}>
-          <User {...user} />
-        </div>
-      ));
+      .filter(user => {
+        if (email.includes("%"))
+          return lower(user.email).includes(lower(removePercentage(email)));
+
+        if (email.length !== 0)
+          return lower(user.email.slice(0, email.length)) === lower(email);
+
+        return user.email !== email;
+      })
+      .filter(user => {
+        if (id.includes("%")) return user.id.includes(removePercentage(id));
+        if (id.length !== 0) return user.id === id;
+        return user.id !== id;
+      });
 
     if (Object.keys(filteredUsers).length !== 0) {
-      return <div>{filteredUsers}</div>;
+      return (
+        <div>
+          {filteredUsers.map(data => (
+            <div key={data.id}>
+              <User {...data} />
+            </div>
+          ))}
+        </div>
+      );
     } else {
       return <div>Usuário nao encontrado</div>;
     }
@@ -116,8 +132,6 @@ function App(props) {
       </label>
       <br />
       <button>Ordenar</button>
-      <br />
-      <button>Buscar</button>
       <div>{!isLoading && showUsers()}</div>
     </React.Fragment>
   );

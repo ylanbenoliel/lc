@@ -10,7 +10,6 @@ export function lower(string) {
 }
 
 // function orderByNameDesc() {
-//   // console.log(userInfo.sort((a, b) => b.id - a.id)) id
 //   const filterNames = userInfo
 //     .map(user => lower(user.name.split(" ")[0]))
 //     .sort()
