@@ -23,9 +23,7 @@ function App(props) {
 
   async function fetchUsers() {
     await api
-      .get(
-        "?results=50&nat=br&inc=name,email,cell,picture&seed=988ce3b1e38ebe0d&noinfo"
-      )
+      .get("&results=50")
       .then(response =>
         response.data.results.map((user, index) => ({
           id: `${index + 1}`,
@@ -83,7 +81,10 @@ function App(props) {
         return user.email !== email;
       })
       .filter(user => {
-        if (id.includes("%")) return user.id.includes(removePercentage(id));
+        if (id.includes("%")) {
+          console.log(id);
+          return user.id.includes(removePercentage(id));
+        }
         if (id.length !== 0) return user.id === id;
         return user.id !== id;
       });
