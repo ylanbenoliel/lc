@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect, useState } from "react";
+import "../styles/main.css";
 import { ClientContext } from "../stores/client";
 import api from "../services/axios";
 import { lower } from "../utils";
@@ -15,11 +16,13 @@ function App(props) {
   const [email, setEmail] = useState("");
   const [id, setId] = useState("");
   const [order, setOrder] = useState("");
+  const [orderBy, setOrderBy] = useState("");
 
   const [queryName, setQueryName] = useQueryString("nome");
   const [queryEmail, setQueryEmail] = useQueryString("email");
   const [queryId, setQueryId] = useQueryString("id");
   const [queryOrder, setQueryOrder] = useQueryString("ordem");
+  const [queryBy, setQueryBy] = useQueryString("por");
 
   async function fetchUsers() {
     await api
@@ -47,6 +50,7 @@ function App(props) {
     if (queryEmail) setEmail(queryEmail);
     if (queryId) setId(queryId);
     if (queryOrder) setOrder(queryOrder);
+    if (queryBy) setOrderBy(queryBy);
   }, []);
 
   function removePercentage(string) {
@@ -58,6 +62,9 @@ function App(props) {
     return e => {
       func(e.target.value);
     };
+  }
+  function toggleOrder() {
+    return queryOrder === "" ? setQueryOrder("dec") : setQueryOrder("");
   }
 
   function showUsers() {
@@ -82,7 +89,6 @@ function App(props) {
       })
       .filter(user => {
         if (id.includes("%")) {
-          console.log(id);
           return user.id.includes(removePercentage(id));
         }
         if (id.length !== 0) return user.id === id;
@@ -91,16 +97,30 @@ function App(props) {
 
     if (Object.keys(filteredUsers).length !== 0) {
       return (
-        <div>
-          {filteredUsers.map(data => (
-            <div key={data.id}>
-              <User {...data} />
-            </div>
-          ))}
-        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Foto</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map(data => (
+              <React.Fragment key={data.id}>
+                <User {...data} />
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
       );
     } else {
-      return <div>Usuário nao encontrado</div>;
+      return (
+        <div>
+          <p>Usuário nao encontrado</p>
+        </div>
+      );
     }
   }
 
@@ -110,27 +130,49 @@ function App(props) {
       <input type="text" value={name} onChange={handleSearch(setName)} />
       <input type="text" value={email} onChange={handleSearch(setEmail)} />
       <input type="text" value={id} onChange={handleSearch(setId)} />
-
       <br />
       <br />
       <label>
         <input
-          type="radio"
-          value="crescente"
-          checked={order === "crescente"}
-          onChange={handleSearch(setOrder)}
-        />
-        Crescente
-      </label>
-      <label>
-        <input
-          type="radio"
-          value="decrescente"
-          checked={order === "decrescente"}
-          onChange={handleSearch(setOrder)}
+          type="checkbox"
+          value="dec"
+          checked={queryOrder === "dec"}
+          onChange={toggleOrder}
         />
         Decrescente
       </label>
+
+      <label>
+        <input
+          type="radio"
+          value="id"
+          checked={orderBy === "id"}
+          onChange={handleSearch(setOrderBy)}
+        />
+        Por id
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          value="nome"
+          checked={orderBy === "nome"}
+          onChange={handleSearch(setOrderBy)}
+        />
+        Por nome
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          value="email"
+          checked={orderBy === "email"}
+          onChange={handleSearch(setOrderBy)}
+        />
+        Por e-mail
+      </label>
+
+      <br />
       <br />
       <button>Ordenar</button>
       <div>{!isLoading && showUsers()}</div>

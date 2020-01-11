@@ -1,15 +1,15 @@
-import React from "react"
-// import Highlight from "./Highlight"
+import React from "react";
+import "../styles/user.css";
 
 export default function User(props) {
   return (
-    <>
-      <p>{`${props.name}`}</p>
-      <div>
+    <tr>
+      <td>{`${props.id}`}</td>
+      <td>
         <img src={props.image} alt={`${props.name}`} />
-      </div>
-      <p>{`${props.email}`}</p>
-      <hr />
-    </>
-  )
+      </td>
+      <td>{`${props.name}`}</td>
+      <td>{`${props.email}`}</td>
+    </tr>
+  );
 }

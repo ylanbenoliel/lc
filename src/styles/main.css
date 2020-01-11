@@ -1,0 +1,11 @@
+.container {
+  flex: 1;
+  align-content: center;
+  align-items: center;
+}
+
+.userNotFound {
+  align-items: center;
+  color: blue;
+  font-size: 30px;
+}
