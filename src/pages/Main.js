@@ -65,7 +65,7 @@ function App(props) {
     if (queryOrder) setOrder(queryOrder);
     if (queryBy) setOrderBy(queryBy);
 
-    filterUserParams();
+    // filterUserParams();
   }, []);
 
   function removePercentage(string) {
@@ -180,7 +180,7 @@ function App(props) {
       );
     } else {
       return (
-        <div>
+        <div className="user-not-found">
           <p>Usuário nao encontrado</p>
         </div>
       );
@@ -189,67 +189,75 @@ function App(props) {
 
   return (
     <React.Fragment>
-      <h2>LC Sistemas</h2>
-      <input type="text" id="inputName" />
-      <input type="text" id="inputEmail" />
-      <input type="text" id="inputId" />
-      <br />
-      <br />
-      <label>
-        <input
-          type="radio"
-          value="asc"
-          checked={order === "asc"}
-          onChange={handleSearch(setOrder)}
-        />
-        Crescente
-      </label>
+      <h2 className="title">LC Sistemas</h2>
+      <input type="text" placeholder="Buscar por id" id="inputId" />
+      <input
+        type="text"
+        // value={name}
+        // onChange={handleSearch(setName)}
+        placeholder="Buscar por nome"
+        id="inputName"
+      />
+      <input type="text" placeholder="Buscar por e-mail" id="inputEmail" />
 
-      <label>
-        <input
-          type="radio"
-          value="desc"
-          checked={order === "desc"}
-          onChange={handleSearch(setOrder)}
-        />
-        Decrescente
-      </label>
+      <label>Ordem</label>
+      <div className="input-check">
+        <label>
+          <input
+            type="radio"
+            value="asc"
+            checked={order === "asc"}
+            onChange={handleSearch(setOrder)}
+          />
+          Crescente
+        </label>
 
-      <br />
+        <label>
+          <input
+            type="radio"
+            value="desc"
+            checked={order === "desc"}
+            onChange={handleSearch(setOrder)}
+          />
+          Decrescente
+        </label>
+      </div>
 
-      <label>
-        <input
-          type="radio"
-          value="id"
-          checked={orderBy === "id"}
-          onChange={handleSearch(setOrderBy)}
-        />
-        Por id
-      </label>
+      <label>Filtrar</label>
+      <div className="input-check">
+        <label>
+          <input
+            type="radio"
+            value="id"
+            checked={orderBy === "id"}
+            onChange={handleSearch(setOrderBy)}
+          />
+          Por id
+        </label>
 
-      <label>
-        <input
-          type="radio"
-          value="nome"
-          checked={orderBy === "nome"}
-          onChange={handleSearch(setOrderBy)}
-        />
-        Por nome
-      </label>
+        <label>
+          <input
+            type="radio"
+            value="nome"
+            checked={orderBy === "nome"}
+            onChange={handleSearch(setOrderBy)}
+          />
+          Por nome
+        </label>
 
-      <label>
-        <input
-          type="radio"
-          value="email"
-          checked={orderBy === "email"}
-          onChange={handleSearch(setOrderBy)}
-        />
-        Por e-mail
-      </label>
+        <label>
+          <input
+            type="radio"
+            value="email"
+            checked={orderBy === "email"}
+            onChange={handleSearch(setOrderBy)}
+          />
+          Por e-mail
+        </label>
+      </div>
 
-      <br />
-      <br />
       <button onClick={searchUser}>Buscar</button>
+
       <div>
         {!isLoading &&
           // true

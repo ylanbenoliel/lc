@@ -1,11 +1,16 @@
-.container {
-  flex: 1;
-  align-content: center;
-  align-items: center;
+body {
+  padding: 2rem;
 }
 
-.userNotFound {
-  align-items: center;
-  color: blue;
-  font-size: 30px;
+.title {
+  text-align: center;
+}
+
+.user-not-found {
+  text-align: center;
+}
+
+.input-check > label {
+  display: inline;
+  padding: 2rem;
 }
