@@ -64,7 +64,18 @@ function App(props) {
     };
   }
   function toggleOrder() {
-    return queryOrder === "" ? setQueryOrder("dec") : setQueryOrder("");
+    return order === "" ? setOrder("dec") : setOrder("");
+  }
+
+  function searchUser(e) {
+    e.preventDefault();
+
+    setIsLoading(true);
+    fetchUsers();
+
+    setName(document.getElementById("inputName").value);
+    setEmail(document.getElementById("inputEmail").value);
+    setId(document.getElementById("inputId").value);
   }
 
   function showUsers() {
@@ -127,16 +138,16 @@ function App(props) {
   return (
     <React.Fragment>
       <h2>LC Sistemas</h2>
-      <input type="text" value={name} onChange={handleSearch(setName)} />
-      <input type="text" value={email} onChange={handleSearch(setEmail)} />
-      <input type="text" value={id} onChange={handleSearch(setId)} />
+      <input type="text" id="inputName" />
+      <input type="text" id="inputEmail" />
+      <input type="text" id="inputId" />
       <br />
       <br />
       <label>
         <input
           type="checkbox"
           value="dec"
-          checked={queryOrder === "dec"}
+          checked={order === "dec"}
           onChange={toggleOrder}
         />
         Decrescente
@@ -174,7 +185,7 @@ function App(props) {
 
       <br />
       <br />
-      <button>Ordenar</button>
+      <button onClick={searchUser}>Buscar</button>
       <div>{!isLoading && showUsers()}</div>
     </React.Fragment>
   );
