@@ -1,6 +1,7 @@
+/* eslint-disable eqeqeq */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import "../styles/main.css";
 import { ClientContext } from "../stores/client";
 import api from "../services/axios";
@@ -20,8 +21,7 @@ const helpers = {
 
 function App(props) {
   const { userInfo, setUserInfo } = useContext(ClientContext);
-  const [filterUserList, setFilterUserList] = useState({});
-
+  const [userFilterList, setUserFilterList] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   const [name, setName] = useState("");
@@ -41,7 +41,7 @@ function App(props) {
       .get("&results=50")
       .then(response =>
         response.data.results.map((user, index) => ({
-          id: index + 1,
+          id: `${index + 1}`,
           name: `${user.name.first} ${user.name.last}`,
           email: `${user.email}`,
           image: `${user.picture.thumbnail}`
@@ -50,22 +50,21 @@ function App(props) {
       .then(users => {
         setUserInfo(users);
         setIsLoading(false);
+        console.log("total", userInfo);
       })
       .catch(error => console.log(error));
   }
 
   //init effect
   useEffect(() => {
+    //TODO fazer pesquisa inicial
     fetchUsers();
 
     if (queryName) setName(queryName);
     if (queryEmail) setEmail(queryEmail);
     if (queryId) setId(queryId);
-    //TODO adicionar exceção caso a pessoa nao escreva nada
     if (queryOrder) setOrder(queryOrder);
     if (queryBy) setOrderBy(queryBy);
-
-    // filterUserParams();
   }, []);
 
   function removePercentage(string) {
@@ -83,55 +82,44 @@ function App(props) {
     console.clear();
     if (order === helpers.asc || order === "") {
       setOrder(helpers.asc);
+      setOrderBy(helpers.id);
 
       if (orderBy === helpers.id) {
-        const filterIds = userInfo.sort((a, b) => a.id + b.id);
-        console.log(filterIds);
+        const filterIds = userInfo.sort(
+          (a, b) => parseInt(a.id) + parseInt(b.id)
+        );
+        setUserInfo(...filterIds);
       }
       if (orderBy === helpers.nome) {
         const filterNames = userInfo.sort(compareValues("name", helpers.asc));
-        console.log(filterNames);
+        setUserInfo(...filterNames);
       }
       if (orderBy === helpers.email) {
         const filterEmails = userInfo.sort(compareValues("email", helpers.asc));
-        console.log(filterEmails);
+        setUserInfo(...filterEmails);
       }
     }
 
     if (order === helpers.desc) {
       if (orderBy === helpers.id) {
-        const filterIds = userInfo.sort((a, b) => b.id - a.id);
-        console.log(filterIds);
+        const filterIds = userInfo.sort(
+          (a, b) => parseInt(b.id) - parseInt(a.id)
+        );
+        setUserInfo(...filterIds);
       }
       if (orderBy === helpers.nome) {
         const filterNames = userInfo.sort(compareValues("name", helpers.desc));
-        console.log(filterNames);
+        setUserInfo(...filterNames);
       }
       if (orderBy === helpers.email) {
         const filterEmails = userInfo.sort(
           compareValues("email", helpers.desc)
         );
-        console.log(filterEmails);
+        setUserInfo(...filterEmails);
       }
     }
-  }
 
-  function searchUser(e) {
-    e.preventDefault();
-
-    setIsLoading(true);
-    fetchUsers();
-
-    setName(document.getElementById("inputName").value);
-    setEmail(document.getElementById("inputEmail").value);
-    setId(document.getElementById("inputId").value);
-    console.log("buscando usuarios com filtros");
-
-    filterUserParams();
-  }
-
-  function showUsers() {
-    let filteredUsers = userInfo
+    const filterUsersInput = userInfo
       .filter(user => {
         if (name.includes("%"))
           return lower(user.name).includes(lower(removePercentage(name)));
@@ -154,11 +142,25 @@ function App(props) {
         if (id.includes("%")) {
           return user.id.includes(removePercentage(id));
         }
-        if (id.length !== 0) return user.id === id;
+        if (id.length !== 0) return user.id == id;
         return user.id !== id;
       });
+    console.log("filt", filterUsersInput);
+    setUserFilterList(filterUsersInput);
+  }
 
-    if (Object.keys(filteredUsers).length !== 0) {
+  function searchUser(e) {
+    e.preventDefault();
+
+    setIsLoading(true);
+    fetchUsers();
+
+    filterUserParams();
+  }
+
+  function showUsers() {
+    //FIXME retornar os usuarios filtrados ou retornar tudo
+    if (Object.keys(userFilterList).length !== 0) {
       return (
         <table>
           <thead>
@@ -170,7 +172,7 @@ function App(props) {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map(data => (
+            {userFilterList.map(data => (
               <React.Fragment key={data.id}>
                 <User {...data} />
               </React.Fragment>
@@ -185,83 +187,123 @@ function App(props) {
         </div>
       );
     }
+    // if (Object.keys(filteredUsers).length !== 0) {
+    //   return (
+    //     <table>
+    //       <thead>
+    //         <tr>
+    //           <th>ID</th>
+    //           <th>Foto</th>
+    //           <th>Nome</th>
+    //           <th>E-mail</th>
+    //         </tr>
+    //       </thead>
+    //       <tbody>
+    //         {filteredUsers.map(data => (
+    //           <React.Fragment key={data.id}>
+    //             <User {...data} />
+    //           </React.Fragment>
+    //         ))}
+    //       </tbody>
+    //     </table>
+    //   );
+    // } else {
+    //   return (
+    //     <div className="user-not-found">
+    //       <p>Usuário nao encontrado</p>
+    //     </div>
+    //   );
+    // }
   }
 
   return (
     <React.Fragment>
       <h2 className="title">LC Sistemas</h2>
-      <input type="text" placeholder="Buscar por id" id="inputId" />
-      <input
-        type="text"
-        // value={name}
-        // onChange={handleSearch(setName)}
-        placeholder="Buscar por nome"
-        id="inputName"
-      />
-      <input type="text" placeholder="Buscar por e-mail" id="inputEmail" />
+      <form>
+        <input
+          type="text"
+          value={id}
+          onChange={handleSearch(setId)}
+          placeholder="Buscar por id"
+          id="inputId"
+        />
+        <input
+          type="text"
+          value={name}
+          onChange={handleSearch(setName)}
+          placeholder="Buscar por nome"
+          id="inputName"
+        />
+        <input
+          type="text"
+          value={email}
+          onChange={handleSearch(setEmail)}
+          placeholder="Buscar por e-mail"
+          id="inputEmail"
+        />
+      </form>
 
-      <label>Ordem</label>
-      <div className="input-check">
-        <label>
-          <input
-            type="radio"
-            value="asc"
-            checked={order === "asc"}
-            onChange={handleSearch(setOrder)}
-          />
-          Crescente
-        </label>
+      <form>
+        <label>Ordem</label>
+        <div className="input-check">
+          <label>
+            <input
+              type="radio"
+              value="asc"
+              checked={order === "asc"}
+              onChange={handleSearch(setOrder)}
+            />
+            Crescente
+          </label>
 
-        <label>
-          <input
-            type="radio"
-            value="desc"
-            checked={order === "desc"}
-            onChange={handleSearch(setOrder)}
-          />
-          Decrescente
-        </label>
-      </div>
+          <label>
+            <input
+              type="radio"
+              value="desc"
+              checked={order === "desc"}
+              onChange={handleSearch(setOrder)}
+            />
+            Decrescente
+          </label>
+        </div>
 
-      <label>Filtrar</label>
-      <div className="input-check">
-        <label>
-          <input
-            type="radio"
-            value="id"
-            checked={orderBy === "id"}
-            onChange={handleSearch(setOrderBy)}
-          />
-          Por id
-        </label>
+        <label>Filtrar</label>
+        <div className="input-check">
+          <label>
+            <input
+              type="radio"
+              value="id"
+              checked={orderBy === "id"}
+              onChange={handleSearch(setOrderBy)}
+            />
+            Por id
+          </label>
 
-        <label>
-          <input
-            type="radio"
-            value="nome"
-            checked={orderBy === "nome"}
-            onChange={handleSearch(setOrderBy)}
-          />
-          Por nome
-        </label>
+          <label>
+            <input
+              type="radio"
+              value="nome"
+              checked={orderBy === "nome"}
+              onChange={handleSearch(setOrderBy)}
+            />
+            Por nome
+          </label>
 
-        <label>
-          <input
-            type="radio"
-            value="email"
-            checked={orderBy === "email"}
-            onChange={handleSearch(setOrderBy)}
-          />
-          Por e-mail
-        </label>
-      </div>
+          <label>
+            <input
+              type="radio"
+              value="email"
+              checked={orderBy === "email"}
+              onChange={handleSearch(setOrderBy)}
+            />
+            Por e-mail
+          </label>
+        </div>
 
-      <button onClick={searchUser}>Buscar</button>
-
+        <button onClick={searchUser}>Buscar</button>
+      </form>
       <div>
-        {!isLoading &&
-          // true
-          showUsers()}
+        {isLoading ? <p className="loading">Carregando...</p> : showUsers()}
       </div>
     </React.Fragment>
   );
