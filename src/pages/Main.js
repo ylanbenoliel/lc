@@ -4,12 +4,24 @@ import React, { useContext, useEffect, useState } from "react";
 import "../styles/main.css";
 import { ClientContext } from "../stores/client";
 import api from "../services/axios";
-import { lower } from "../utils";
+import { lower, compareValues } from "../utils";
 import User from "../components/User";
 import useQueryString from "../hooks/useQueryString";
 
+const helpers = {
+  nome: "nome",
+  id: "id",
+  email: "email",
+  desc: "desc",
+  asc: "asc",
+  ordem: "ordem",
+  por: "por"
+};
+
 function App(props) {
   const { userInfo, setUserInfo } = useContext(ClientContext);
+  const [filterUserList, setFilterUserList] = useState({});
+
   const [isLoading, setIsLoading] = useState(true);
 
   const [name, setName] = useState("");
@@ -29,7 +41,7 @@ function App(props) {
       .get("&results=50")
       .then(response =>
         response.data.results.map((user, index) => ({
-          id: `${index + 1}`,
+          id: index + 1,
           name: `${user.name.first} ${user.name.last}`,
           email: `${user.email}`,
           image: `${user.picture.thumbnail}`
@@ -49,8 +61,11 @@ function App(props) {
     if (queryName) setName(queryName);
     if (queryEmail) setEmail(queryEmail);
     if (queryId) setId(queryId);
+    //TODO adicionar exceção caso a pessoa nao escreva nada
     if (queryOrder) setOrder(queryOrder);
     if (queryBy) setOrderBy(queryBy);
+
+    filterUserParams();
   }, []);
 
   function removePercentage(string) {
@@ -63,8 +78,42 @@ function App(props) {
       func(e.target.value);
     };
   }
-  function toggleOrder() {
-    return order === "" ? setOrder("dec") : setOrder("");
+
+  function filterUserParams() {
+    console.clear();
+    if (order === helpers.asc || order === "") {
+      setOrder(helpers.asc);
+
+      if (orderBy === helpers.id) {
+        const filterIds = userInfo.sort((a, b) => a.id + b.id);
+        console.log(filterIds);
+      }
+      if (orderBy === helpers.nome) {
+        const filterNames = userInfo.sort(compareValues("name", helpers.asc));
+        console.log(filterNames);
+      }
+      if (orderBy === helpers.email) {
+        const filterEmails = userInfo.sort(compareValues("email", helpers.asc));
+        console.log(filterEmails);
+      }
+    }
+
+    if (order === helpers.desc) {
+      if (orderBy === helpers.id) {
+        const filterIds = userInfo.sort((a, b) => b.id - a.id);
+        console.log(filterIds);
+      }
+      if (orderBy === helpers.nome) {
+        const filterNames = userInfo.sort(compareValues("name", helpers.desc));
+        console.log(filterNames);
+      }
+      if (orderBy === helpers.email) {
+        const filterEmails = userInfo.sort(
+          compareValues("email", helpers.desc)
+        );
+        console.log(filterEmails);
+      }
+    }
   }
 
   function searchUser(e) {
@@ -76,6 +125,9 @@ function App(props) {
     setName(document.getElementById("inputName").value);
     setEmail(document.getElementById("inputEmail").value);
     setId(document.getElementById("inputId").value);
+    console.log("buscando usuarios com filtros");
+
+    filterUserParams();
   }
 
   function showUsers() {
@@ -145,13 +197,25 @@ function App(props) {
       <br />
       <label>
         <input
-          type="checkbox"
-          value="dec"
-          checked={order === "dec"}
-          onChange={toggleOrder}
+          type="radio"
+          value="asc"
+          checked={order === "asc"}
+          onChange={handleSearch(setOrder)}
+        />
+        Crescente
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          value="desc"
+          checked={order === "desc"}
+          onChange={handleSearch(setOrder)}
         />
         Decrescente
       </label>
+
+      <br />
 
       <label>
         <input
@@ -186,7 +250,11 @@ function App(props) {
       <br />
       <br />
       <button onClick={searchUser}>Buscar</button>
-      <div>{!isLoading && showUsers()}</div>
+      <div>
+        {!isLoading &&
+          // true
+          showUsers()}
+      </div>
     </React.Fragment>
   );
 }
