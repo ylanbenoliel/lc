@@ -8,6 +8,7 @@ body {
 
 .user-not-found {
   text-align: center;
+  font-size: 3rem;
 }
 
 .loading {

@@ -24,17 +24,11 @@ function App(props) {
   const [userFilterList, setUserFilterList] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [id, setId] = useState("");
-  const [order, setOrder] = useState("");
-  const [orderBy, setOrderBy] = useState("");
-
-  const [queryName, setQueryName] = useQueryString("nome");
-  const [queryEmail, setQueryEmail] = useQueryString("email");
-  const [queryId, setQueryId] = useQueryString("id");
-  const [queryOrder, setQueryOrder] = useQueryString("ordem");
-  const [queryBy, setQueryBy] = useQueryString("por");
+  const [name, setName] = useQueryString("nome", "");
+  const [email, setEmail] = useQueryString("email", "");
+  const [id, setId] = useQueryString("id", "");
+  const [order, setOrder] = useQueryString("ordem", "");
+  const [orderBy, setOrderBy] = useQueryString("por", "");
 
   async function fetchUsers() {
     await api
@@ -50,21 +44,18 @@ function App(props) {
       .then(users => {
         setUserInfo(users);
         setIsLoading(false);
-        console.log("total", userInfo);
       })
-      .catch(error => console.log(error));
+      .catch(e => {
+        console.log(e);
+      });
   }
 
   //init effect
   useEffect(() => {
-    //TODO fazer pesquisa inicial
-    fetchUsers();
+    //FIXME fazer pesquisa inicial
 
-    if (queryName) setName(queryName);
-    if (queryEmail) setEmail(queryEmail);
-    if (queryId) setId(queryId);
-    if (queryOrder) setOrder(queryOrder);
-    if (queryBy) setOrderBy(queryBy);
+    fetchUsers();
+    filterUserParams();
   }, []);
 
   function removePercentage(string) {
@@ -79,11 +70,10 @@ function App(props) {
   }
 
   function filterUserParams() {
-    console.clear();
-    if (order === helpers.asc || order === "") {
-      setOrder(helpers.asc);
-      setOrderBy(helpers.id);
+    if (!order) setOrder(helpers.asc);
+    if (!orderBy) setOrderBy(helpers.id);
 
+    if (order === helpers.asc) {
       if (orderBy === helpers.id) {
         const filterIds = userInfo.sort(
           (a, b) => parseInt(a.id) + parseInt(b.id)
@@ -145,8 +135,8 @@ function App(props) {
         if (id.length !== 0) return user.id == id;
         return user.id !== id;
       });
-    console.log("filt", filterUsersInput);
     setUserFilterList(filterUsersInput);
+    setIsLoading(false);
   }
 
   function searchUser(e) {
@@ -159,8 +149,7 @@ function App(props) {
   }
 
   function showUsers() {
-    //FIXME retornar os usuarios filtrados ou retornar tudo
-    if (Object.keys(userFilterList).length !== 0) {
+    if (Object.keys(userFilterList).length > 0) {
       return (
         <table>
           <thead>
@@ -180,40 +169,14 @@ function App(props) {
           </tbody>
         </table>
       );
-    } else {
+    }
+    if (Object.keys(userFilterList).length == 0) {
       return (
         <div className="user-not-found">
           <p>Usuário nao encontrado</p>
         </div>
       );
     }
-    // if (Object.keys(filteredUsers).length !== 0) {
-    //   return (
-    //     <table>
-    //       <thead>
-    //         <tr>
-    //           <th>ID</th>
-    //           <th>Foto</th>
-    //           <th>Nome</th>
-    //           <th>E-mail</th>
-    //         </tr>
-    //       </thead>
-    //       <tbody>
-    //         {filteredUsers.map(data => (
-    //           <React.Fragment key={data.id}>
-    //             <User {...data} />
-    //           </React.Fragment>
-    //         ))}
-    //       </tbody>
-    //     </table>
-    //   );
-    // } else {
-    //   return (
-    //     <div className="user-not-found">
-    //       <p>Usuário nao encontrado</p>
-    //     </div>
-    //   );
-    // }
   }
 
   return (
@@ -224,21 +187,21 @@ function App(props) {
           type="text"
           value={id}
           onChange={handleSearch(setId)}
-          placeholder="Buscar por id"
+          placeholder="Digite o ID"
           id="inputId"
         />
         <input
           type="text"
           value={name}
           onChange={handleSearch(setName)}
-          placeholder="Buscar por nome"
+          placeholder="Digite o nome"
           id="inputName"
         />
         <input
           type="text"
           value={email}
           onChange={handleSearch(setEmail)}
-          placeholder="Buscar por e-mail"
+          placeholder="Digite o e-mail"
           id="inputEmail"
         />
       </form>
