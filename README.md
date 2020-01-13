@@ -26,7 +26,7 @@ As requisições são do tipo GET
 | :---: | :---------: | :------------------------------------------------------------------------------------------------------------: | :-----------: | :-----------------------: |
 |  id   |     Não     | Busca o usuário de acordo com o numero digitado. Utilizando % busca por usuários que contêm o número digitado. |               |          1% - 10          |
 | nome  |     Não     |     Busca o usuário iniciando o nome digitado. Utilizando % busca por usuários que contêm o nome digitado.     |               |         an% - ana         |
-| email |     Não     |                                                                                                                |               |        br% - bruna        |
+| email |     Não     |    Busca o usuário iniciando o email digitado. Utilizando % busca por usuários que contêm o email digitado.    |               |        br% - bruna        |
 | ordem |     Não     |                          Ordena de forma crescente com _asc_ e decrescente com _desc_                          |     _asc_     |        asc ou desc        |
 |  por  |     Não     |                                     Ordena de acordo com a string recebida                                     |     _id_      | _id_ ou _nome_ ou _email_ |
 
